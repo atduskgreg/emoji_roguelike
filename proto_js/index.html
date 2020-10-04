@@ -122,7 +122,7 @@
                         {
                             result = result + this.skin_color;
                         }
-                        console.log(this.beard == data.beard.cleanShave);
+
                         if(this.gender == data.genders.woman || (this.beard != data.beard.beard && this.beard != data.beard.cleanShave)) // beards are not compatible with hair
                         {
                             if(this.hair != null && this.hair != "default" )
@@ -156,7 +156,6 @@
                 }
 
                 function setupChoices(name){
-                    console.log(data[name]);
                     for(key in data[name]){
                         choiceName = key
                         choiceCode = data[name][key];
@@ -244,7 +243,6 @@
                     if(!$("#beard").hasClass("disabled"))
                     {
                         playerCharacter.beard = $(this).html();
-                        console.log(playerCharacter.beard);
                         if(playerCharacter.beard != data.beard.mustache)
                         {
 
