@@ -1,0 +1,151 @@
+<html>
+    <head>
+        <meta charset='utf-8'>
+        <style>
+            body {
+                text-align: center;
+                background: #000;
+            }
+            table {
+                margin:0 auto;
+            }
+            
+        </style>
+        <script src="libs/jquery-2.1.4.min.js"></script>
+
+        <script src="libs/rot.min.js"></script>
+        <script>
+            data = {
+                "terrain" : {
+                    "snow_mountain" : "🏔",
+                    "mountain" : "⛰",
+                    "volcano" : "🌋",
+                    "beach" : "🏖",
+                    "desert" : "🏜",
+                    "desert_island" : "🏝",
+                    "ocean" : "🌊",
+                    "tree_evergreen" : "🌲",
+                    "tree_deciduous" : "🌳",
+                    "tree_palm" : "🌴"
+                },
+                "buildings" : {
+                    "temple" : "🏛",
+                    "houses" : "🏘",
+                    "house" : "🏠",
+                    "derelict_house" : "🏚",
+                    "garden_house" : "🏡",
+                    "office_building" : "🏢",
+                    "school" : "🏫",
+                    "post_office" : "🏤",
+                    "hospital" : "🏥",
+                    "castle" : "🏰",
+                    "factor" : "🏭",
+                    "church" : "⛪",
+                    "mosque" : "🕌",
+                    "synagogue" : "🕍",
+                    "shinto_shrine" : "⛩",
+                    "kaaba" : "🕋"
+
+                }
+                
+            }
+            mean = 2.5;
+           
+            numRows = 30;
+            numCols = 30;
+
+            variance = 1.0
+            vals = [];
+            scale = 125;
+            speed = 1/12;
+
+            function getTileColor(val)
+            {
+                if(val < 40)
+                {
+                    return {r : 73, g : 222, b :242}
+                }
+                else if(val < 90)
+                {
+                    
+                    return {r : 230, g : 215, b :9}
+
+                }
+                else if(val < 160)
+                {
+                    return {r : 16, g : 158, b: 66}
+                }
+                else if(val < 230)
+                {
+                    return {r:148, g:87, b:1}
+                }
+
+                else 
+                {
+                    return {r:233, g:243, b:245}
+                }
+            }
+
+            function getTileContents(val){
+                if(val < 40)
+                {
+                    return data.terrain.ocean;
+                }
+                else if(val < 50)
+                {
+                    return data.terrain.beach;
+                }
+                else if(val < 90){
+                    return data.terrain.desert;
+                }
+                else if(val < 160)
+                {
+                    return ROT.RNG.getItem([data.terrain.tree_evergreen, data.terrain.tree_deciduous]);
+
+                }
+                else if(val < 230)
+                {
+
+                    weights = {
+                        "⛰" : 9,
+                        "🌋" : 1,
+
+                    }
+                    return ROT.RNG.getWeightedValue(weights);
+                    //return ROT.RNG.getItem([data.terrain.mountain, data.terrain.volcano]);
+
+                }
+                
+                else
+                {
+                    return data.terrain.snow_mountain;
+                }
+            }
+
+            $(document).ready(function(){
+                var noise = new ROT.Noise.Simplex();
+                $("#map").append("<table cellspacing='0' cellpadding='0'>");
+                for(var i = 0; i < numRows; i++)
+                {
+                    row = $("<tr></tr>");
+                    for(var j = 0; j < numCols; j++)
+                    {
+                        v =  Math.round(noise.get(i * speed, j * speed) * scale + 125);
+                        vals.push({"x" : i, "y" : j, "val" : v});
+                        //style='background-color:rgb("+v+","+v+","+v+")'
+                        c = getTileColor(v);
+                        row.append("<td style='background-color:rgb("+c.r+","+c.g+","+c.b+")'>"+getTileContents(v)+"</td>");
+                    }
+                    $("#map table").append(row);
+                }
+
+                
+            });
+            
+        </script>
+    </head>
+
+    <body>
+        <div id="map"></div>
+    </body>
+</html>

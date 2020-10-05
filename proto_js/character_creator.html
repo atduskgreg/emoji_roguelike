@@ -1,0 +1,291 @@
+<html>
+    <head>
+        <meta charset='utf-8'>
+        <style>
+            body {
+                font-size: 60px
+            }
+            a {
+                text-decoration: none;
+            }
+
+            #display {
+                width: 200px;
+                height: 200px;
+                border: 1px solid #000;
+                float: left;
+                margin-right: 10px;
+                font-size: 150px;
+                text-align: center;
+                padding: 50px 50px;
+            }
+
+            #choices {
+                float: left;
+            }
+
+            #choices .selected
+            {
+                border: 1px solid #666;
+            }
+
+            .defaultHair {
+                height: 50px;
+            }
+
+            .disabled {
+                opacity: 50%;
+            }
+        </style>
+         <script src="libs/jquery-2.1.4.min.js"></script>
+        <script>
+
+            data = {
+               beard : {
+                    beard : "🧔",
+                    mustache : "👨",
+                    cleanShave : "👱"
+               },
+               genders : {
+                    man : "👨",
+                    woman: "👩"
+               },
+             
+                hair : {
+                    red : "🦰",
+                    curly : "🦱",
+                    white : "🦳",
+                    bald  : "🦲",
+                    default : false
+                },
+                skin_color : {
+                    "light" : "1F3FB",
+                    "medium-light":"1F3FC",
+                    "medium": "1F3FD",
+                    "medium-dark": "1F3FE",
+                    "dark" : "1F3FF"
+                }
+            }    
+            
+/*
+            data = {
+                "genders" : [
+                    {"man" : "1F468"},
+                    {"woman" : "1F469"}
+                ],
+                "skin_color" : [
+                    {"light":"1F3FB"},
+                    {"medium-light":"1F3FC"},
+                    {"medium": "1F3FD"},
+                    {"medium-dark": "1F3FE"},
+                    {"dark" : "1F3FF"}
+                ],
+                "hair" : [
+                    {"red":"1F9B0"},
+                    {"curly":"1F9B1"},
+                    {"white": "1F9B3"},
+                    {"bald" : "1F9B2"},
+                    {"default" : false}
+                ],
+
+                "beard" : [
+                    {"beard" : "1F9D4"},
+                    {"noBeard" : "1F468"},
+                    {"noMustache": "1F471"}
+                ]
+                
+            }*/
+
+            var playerCharacter = {
+                    display : function(){
+                        result = "";
+                        if(this.gender == data.genders.woman)
+                        {
+                            result = result + this.gender;
+                        }
+                        else
+                        {
+                            if(this.beard != null)
+                            {
+                                result = result + this.beard;
+
+                            }
+                            else
+                            {
+                                result = result + this.gender;
+
+                            }
+                        }
+
+                       
+                        if(this.skin_color != null)
+                        {
+                            result = result + this.skin_color;
+                        }
+
+                        if(this.gender == data.genders.woman || (this.beard != data.beard.beard && this.beard != data.beard.cleanShave)) // beards are not compatible with hair
+                        {
+                            if(this.hair != null && this.hair != "default" )
+                            {
+                                result = result + "&#x200D;" + this.hair + ""
+                            }
+                        }
+                        
+                        return result;
+                    }
+                }
+
+            $(document).ready(function(){
+
+
+               
+
+                function displayCharacter()
+                {
+                    $("#display").html(playerCharacter.display());
+                }
+
+
+                function getChoice(ele, attribute)
+                {
+                    chosenValue = $(ele).attr("value");
+                    chosenEntry = data[attribute].filter(function(g){return Object.keys(g)[0] == chosenValue})[0]
+                    chosenCode = Object.values(chosenEntry)[0];
+
+                    return {"value" : chosenValue, "code" : chosenCode};
+                }
+
+                function setupChoices(name){
+                    for(key in data[name]){
+                        choiceName = key
+                        choiceCode = data[name][key];
+
+                        if(choiceCode == false)
+                        {
+                            $("#"+name).append("<a href='' class='"+name+"' value='"+choiceName+"'><img class='defaultHair' src='images/default_hair.png'></a>");
+
+                        }
+                        else
+                        {
+                            if(name == "skin_color")
+                            {
+                                choiceCode = "&#x" + choiceCode + ";";
+                            }
+
+                            $("#"+name).append("<a href='' class='"+name+"' value='"+choiceName+"'>"+choiceCode+"</a>");
+
+                        }
+                    };
+                }
+
+
+                setupChoices("genders");
+                setupChoices("hair");
+                setupChoices("skin_color");
+                setupChoices("beard");
+
+                $(".genders").click(function(e){
+                    e.preventDefault();
+                    if(!$("#genders").hasClass("disabled"))
+                    {
+                        playerCharacter.gender = $(this).html();
+
+                        if(playerCharacter.gender == data.genders.woman)
+                        {
+                            $("#beard").addClass("disabled");
+                            $("#hair").removeClass("disabled");
+                        }
+                        else
+                        {
+                            $("#beard").removeClass("disabled");
+                            $("#hair").removeClass("disabled");
+
+                            if(playerCharacter.beard == data.beard.cleanShave)
+                            {
+                                $("#hair").addClass("disabled");
+                            }
+
+                        }
+                        $(".genders").removeClass("selected");
+                        $(this).addClass("selected");
+                        displayCharacter();
+                    }
+                    
+                });
+
+                $(".hair").click(function(e){
+                    e.preventDefault();
+                    if(!$("#hair").hasClass("disabled"))
+                    {
+                        if($(this).find("img").length > 0)
+                        {
+                            playerCharacter.hair = "default";
+                        }
+                        else{
+                            playerCharacter.hair = $(this).html();
+                        
+                        }
+                        $(".hair").removeClass("selected");
+                        $(this).addClass("selected");
+                        displayCharacter();
+                    }
+                });
+                $(".skin_color").click(function(e){
+                    e.preventDefault();
+                    playerCharacter.skin_color = $(this).html();
+                    $(".skin_color").removeClass("selected");
+                    $(this).addClass("selected");
+                    displayCharacter();
+                });
+
+                $(".beard").click(function(e){
+                    e.preventDefault();
+                    if(!$("#beard").hasClass("disabled"))
+                    {
+                        playerCharacter.beard = $(this).html();
+                        if(playerCharacter.beard != data.beard.mustache)
+                        {
+
+                            $("#hair").addClass("disabled");
+                        }
+                        else
+                        {
+                            $("#hair").removeClass("disabled");
+                        }
+                    
+                        $(".beard").removeClass("selected");
+                        $(this).addClass("selected");
+                        displayCharacter();
+                    }
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div id="characterCreator">
+            <div id="display">
+
+            </div>
+            <div id="choices">
+                <div id="genders"></div>
+                <div id="hair"></div>
+                <div id="skin_color"></div>
+                <div id="beard"></div>
+
+            </div>
+            
+        </div>
+        
+        <!--
+        <p>&#x1F9D4;&#x1F3FB;</p>
+
+        <p>&#x1F468; + &#x1F3FE; + &#x1F9B0; = &#x1F468;&#x200D;&#x1F9B0;</p>
+
+        <p>&#x1F468; + &#x1F9B1; = &#x1F468;&#x200D;&#x1F9B1;</p>
+
+        <p>&#x1F468; + &#x1F3FE; + &#x1F9B1; = &#x1F468;&#x1F3FE;&#x200D;&#x1F9B1; &#x1F9B0;</p>
+
+        <p>&#x1F468; + &#x1F3FE; + &#x1F393; = &#x1F468;&#x1F3FE;&#x200D;&#x1F393;</p>
+        -->
+    </body>
+</html>
